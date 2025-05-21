@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Schedule - May 22-28</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: #3498db;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .days-container {
+            padding: 30px;
+        }
+        
+        .day-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+        }
+        
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .day-header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .day-title {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .day-date {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background-color 0.2s ease;
+        }
+        
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+        
+        .schedule-item:hover {
+            background-color: #f1f2f6;
+        }
+        
+        .schedule-item.completed {
+            background-color: #d5f4e6;
+            opacity: 0.8;
+        }
+        
+        .time-slot {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            min-width: 120px;
+            text-align: center;
+            margin-right: 20px;
+        }
+        
+        .math-time { background: #e74c3c; }
+        .break-time { background: #f39c12; }
+        .svt-time { background: #27ae60; }
+        .philosophy-time { background: #9b59b6; }
+        .english-time { background: #3498db; }
+        .free-time { background: #95a5a6; }
+        
+        .task-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-description {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .task-checkbox.checked {
+            background: #27ae60;
+            border-color: #27ae60;
+            color: white;
+        }
+        
+        .stats {
+            background: #ecf0f1;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .day-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .schedule-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            
+            .time-slot {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Study Schedule</h1>
+            <p>Exam Preparation Week</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalTasks">42</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="completedTasks">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="remainingTasks">42</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="progressPercent">0%</div>
+                <div class="stat-label">Progress</div>
+            </div>
+        </div>
+        
+        <div class="days-container">
+            <!-- Day 1 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">Day 1</div>
+                    <div class="day-date">May 22</div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">11:00–2:00</div>
+                    <div class="task-content">
+                        <div class="task-description">Math Exam 1</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot break-time">2:00–2:30</div>
+                    <div class="task-content">
+                        <div class="task-description">Lunch/Break</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">2:30–3:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Lesson 1 Memorization</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">3:30–4:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Lesson 2 Memorization</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">4:30–5:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Manhajeya intro structure</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot english-time">5:30–6:20</div>
+                    <div class="task-content">
+                        <div class="task-description">English – Formal writing practice</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 2 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">Day 2</div>
+                    <div class="day-date">May 23</div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">11:00–2:00</div>
+                    <div class="task-content">
+                        <div class="task-description">Math Exam 2</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">2:30–3:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Lesson 3 Memorization</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">3:30–4:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Plato, Descartes opinions</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">4:30–5:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Write 1 full Manhajeya</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot english-time">5:30–6:20</div>
+                    <div class="task-content">
+                        <div class="task-description">English – Vocabulary & text analysis</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 3 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">Day 3</div>
+                    <div class="day-date">May 24</div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">11:00–2:00</div>
+                    <div class="task-content">
+                        <div class="task-description">Math Exam 3</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">2:30–3:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Revise 3 lessons (Flashcards/Summary)</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot english-time">3:30–4:20</div>
+                    <div class="task-content">
+                        <div class="task-description">English – Practice writing about abstract topics</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">4:30–5:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Kant, Nietzsche opinions</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot free-time">5:30–6:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Free/Buffer or recap anything</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 4 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">Day 4</div>
+                    <div class="day-date">May 25</div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">11:00–2:00</div>
+                    <div class="task-content">
+                        <div class="task-description">Math Exam 4</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">2:30–3:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Lesson 4 Memorization</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot english-time">3:30–4:20</div>
+                    <div class="task-content">
+                        <div class="task-description">English – Read a short essay, analyze structure</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">4:30–5:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Write another Manhajeya + polish arguments</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">5:30–6:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Quick quiz review for SVT & vocab flashcards</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 5 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">Day 5</div>
+                    <div class="day-date">May 26</div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">11:00–2:00</div>
+                    <div class="task-content">
+                        <div class="task-description">Math Exam 5</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">2:30–3:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Lesson 5 Memorization</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot english-time">3:30–4:20</div>
+                    <div class="task-content">
+                        <div class="task-description">English – Essay writing timed (30 min)</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">4:30–5:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Simulate full answer with quotes</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">5:30–6:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Review key formulas & weak math areas</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 6 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">Day 6</div>
+                    <div class="day-date">May 27</div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">11:00–2:00</div>
+                    <div class="task-content">
+                        <div class="task-description">Math Exam 6</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">2:30–3:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Recap all lessons (flowcharts, notes)</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">3:30–4:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Revise all thinkers</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot english-time">4:30–5:20</div>
+                    <div class="task-content">
+                        <div class="task-description">English – Revise writing techniques + do corrections</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot free-time">5:30–6:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Free or rest a bit (brain dump if needed)</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 7 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">Day 7</div>
+                    <div class="day-date">May 28</div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot math-time">11:00–2:00</div>
+                    <div class="task-content">
+                        <div class="task-description">Math Exam 7 (Final push)</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot svt-time">2:30–3:20</div>
+                    <div class="task-content">
+                        <div class="task-description">SVT – Final recall (Quiz yourself)</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot english-time">3:30–4:20</div>
+                    <div class="task-content">
+                        <div class="task-description">English – Light review + motivation reading</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot philosophy-time">4:30–5:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Philosophy – Read your manhajeya & polish it</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="time-slot free-time">5:30–6:20</div>
+                    <div class="task-content">
+                        <div class="task-description">Mindset prep + organize exam tools/documents</div>
+                        <div class="task-checkbox" onclick="toggleTask(this)">✓</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTask(checkbox) {
+            checkbox.classList.toggle('checked');
+            checkbox.closest('.schedule-item').classList.toggle('completed');
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalTasks = document.querySelectorAll('.task-checkbox').length;
+            const completedTasks = document.querySelectorAll('.task-checkbox.checked').length;
+            const remainingTasks = totalTasks - completedTasks;
+            const progressPercent = Math.round((completedTasks / totalTasks) * 100);
+
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('remainingTasks').textContent = remainingTasks;
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+            document.getElementById('progress').style.width = progressPercent + '%';
+        }
+
+        // Initialize stats on page load
+        updateStats();
+    </script>
+</body>
+</html>
