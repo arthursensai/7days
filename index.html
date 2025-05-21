@@ -231,6 +231,11 @@
         <div class="header">
             <h1>📚 Study Schedule</h1>
             <p>Exam Preparation Week</p>
+            <div style="margin-top: 15px;">
+                <button onclick="resetProgress()" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: background 0.2s;">
+                    🔄 Reset Progress
+                </button>
+            </div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progress"></div>
             </div>
@@ -567,10 +572,71 @@
     </div>
 
     <script>
+        // Cookie functions
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function saveProgress() {
+            const completedTasks = [];
+            document.querySelectorAll('.task-checkbox.checked').forEach((checkbox, index) => {
+                const taskDescription = checkbox.closest('.schedule-item').querySelector('.task-description').textContent;
+                const dayTitle = checkbox.closest('.day-card').querySelector('.day-title').textContent;
+                const dayDate = checkbox.closest('.day-card').querySelector('.day-date').textContent;
+                completedTasks.push(`${dayTitle}-${dayDate}-${taskDescription}`);
+            });
+            setCookie('studyProgress', JSON.stringify(completedTasks), 30); // Save for 30 days
+        }
+
+        function loadProgress() {
+            const savedProgress = getCookie('studyProgress');
+            if (savedProgress) {
+                try {
+                    const completedTasks = JSON.parse(savedProgress);
+                    completedTasks.forEach(taskId => {
+                        const [dayTitle, dayDate, taskDescription] = taskId.split('-');
+                        const dayCard = Array.from(document.querySelectorAll('.day-card')).find(card => {
+                            const cardDay = card.querySelector('.day-title').textContent;
+                            const cardDate = card.querySelector('.day-date').textContent;
+                            return cardDay === dayTitle && cardDate === dayDate;
+                        });
+                        
+                        if (dayCard) {
+                            const taskItem = Array.from(dayCard.querySelectorAll('.schedule-item')).find(item => {
+                                return item.querySelector('.task-description').textContent === taskDescription;
+                            });
+                            
+                            if (taskItem) {
+                                const checkbox = taskItem.querySelector('.task-checkbox');
+                                checkbox.classList.add('checked');
+                                taskItem.classList.add('completed');
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.log('Error loading saved progress:', e);
+                }
+            }
+        }
+
         function toggleTask(checkbox) {
             checkbox.classList.toggle('checked');
             checkbox.closest('.schedule-item').classList.toggle('completed');
             updateStats();
+            saveProgress(); // Save progress whenever a task is toggled
         }
 
         function updateStats() {
@@ -586,8 +652,22 @@
             document.getElementById('progress').style.width = progressPercent + '%';
         }
 
-        // Initialize stats on page load
-        updateStats();
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                setCookie('studyProgress', '', -1); // Delete cookie
+                document.querySelectorAll('.task-checkbox.checked').forEach(checkbox => {
+                    checkbox.classList.remove('checked');
+                    checkbox.closest('.schedule-item').classList.remove('completed');
+                });
+                updateStats();
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProgress();
+            updateStats();
+        });
     </script>
 </body>
 </html>
